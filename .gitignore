@@ -1,0 +1,6 @@
+# Kit de référence : le portfolio ne montre que mon propre code
+kit/
+
+# Fichiers produits par la compilation
+*.exe
+*.dll

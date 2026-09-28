@@ -15,3 +15,7 @@ Les problèmes et leurs solutions, trois vraies enquêtes :
 
 Note de commandes de terminal : cd = change directory. 
 ls = list directory contents mkdir = make directory rm = remove file or directory cp = copy file or directory mv = move file or directory pwd = print working directory
+
+## Semaine 1 — 4 octobre 2026
+### Lundi 28 septembre 2026 - 12h03
+Premier fichier COBOL écris de A à Z (FICHE.clb) écrit. Analyse des erreurs et débogage. Le programme est fonctionnel et affiche correctement les informations demandées.

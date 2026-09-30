@@ -189,6 +189,207 @@ Pour ne plus te faire piéger, deux habitudes au choix :
 
 Ton réflexe était le bon, d'ailleurs : tu as vérifié sur GitHub au lieu de supposer que c'était fait.
 
+### Lundi 28 Sept 2026 - 23h59
+Une seule cause, encore une fois : l'emplacement du point. Tu l'as mis juste après le nom de la zone, au lieu de le mettre à la fin de la déclaration.
+
+cobol
+       01  WS-Z4.            PIC 9(4)
+
+Pour le compilateur, le point veut dire « fin de la déclaration ». Il lit donc « une zone WS-Z4, sans PICTURE », d'où la première erreur (PICTURE clause required). Ensuite, il trouve un PIC 9(4) qui n'appartient à rien, et toute la suite déraille.
+
+La confusion est compréhensible, et elle vient sans doute de FICHE. Là-bas, 01 WS-CLIENT. avait bien son point juste après le nom, parce que c'était un groupe : une zone sans PIC, qui ne fait que contenir des sous-zones. Ici, chaque zone est élémentaire, avec sa propre PIC. La règle unique :
+
+Le point se place à la fin de la déclaration complète : nom, puis PIC, puis VALUE, puis le point.
+
+Ton bloc corrigé :
+
+cobol
+       01  WS-Z4                   PIC 9(4).
+       01  WS-X4                   PIC X(4).
+       01  WS-D52                  PIC 9(3)V99.
+       01  WS-S4                   PIC S9(4).
+       01  WS-X8                   PIC X(8).
+       01  WS-GRAND                PIC 9(6)   VALUE 123456.
+       01  WS-TEXTE                PIC X(8)   VALUE 'ABCDEFGH'.
+
+Pour WS-GRAND et WS-TEXTE, tu avais deux points : garde seulement celui de la fin.
+
+Deux détails en passant :
+
+L'avertissement de fin de fichier est revenu : appuie sur Entrée après GOBACK., puis Ctrl+S.
+La ligne 30 (MOVE WS-Z4 TO WS-X8) est décalée de quatre espaces de plus que les autres. Ce n'est pas une erreur, mais aligne-la sur ses voisines.
+
+#### Les zones à déclarer
+Nom	PICTURE	VALUE
+WS-Z4	9(4)	aucune
+WS-X4	X(4)	aucune
+WS-D52	9(3)V99	aucune
+WS-S4	S9(4)	aucune
+WS-X8	X(8)	aucune
+WS-GRAND	9(6)	123456
+WS-TEXTE	X(8)	'ABCDEFGH'
+
+#### Les dix cas, dans cet ordre
+Cas	Instruction	Ta prédiction
+A	MOVE 12 TO WS-Z4	
+B	MOVE 123456 TO WS-Z4	
+C	MOVE 'AB' TO WS-X4	
+D	MOVE 'ABCDEFGH' TO WS-X4	
+E	MOVE 12.345 TO WS-D52	
+F	MOVE -25 TO WS-Z4	
+G	MOVE -25 TO WS-S4	
+H	MOVE WS-Z4 TO WS-X8	
+I	MOVE WS-GRAND TO WS-Z4	
+J	MOVE WS-TEXTE TO WS-X4
+
+#### Les dix cas expliqués
+Cas	Résultat	Explication
+A	[0012]	Un nombre se cale à droite, sur la virgule. Les positions vides à gauche sont remplies de zéros.
+B	[3456]	Même calage à droite. Les chiffres qui dépassent sont coupés à gauche : les milliers disparaissent.
+C	[AB ]	Un texte se cale à gauche. Les positions vides à droite sont remplies d'espaces.
+D	[ABCD]	Même calage à gauche. Ce qui dépasse est coupé à droite.
+E	[012.34]	Le nombre se cale sur la virgule : 12 devient 012 à gauche, et les décimales ,345 deviennent ,34 à droite. Le 5 est coupé, sans arrondi. Sur mainframe, tu verrais 01234.
+F	[0025]	9(4) n'a pas de S : la zone ne peut pas mémoriser de signe. Il ne reste que la valeur absolue.
+G	[-0025]	S9(4) garde le signe. Sa façon de s'afficher varie selon le système : c'est pourquoi on passe par des zones d'édition pour afficher (semaine 3).
+H	[0025 ]	Un nombre copié dans une zone X devient du texte : ses chiffres, zéros compris, sont traités comme des caractères, donc calés à gauche et complétés d'espaces.
+I	[3456]	Exactement la règle de B. Que la valeur vienne d'une constante ou d'une variable ne change rien.
+J	[ABCD]	Exactement la règle de D.
+### Mercredi 30 Sept 2026 - 13h26
+Pourquoi doit-on écrire PROGRAM-ID. HELLO. dans une IDENTIFICATION DIVISION, plutôt que de coder directement les instructions ? À quoi sert ce découpage en divisions ?
+
+REPONSE :
+Pour imposer une structure identique à tous les programmes COBOL du monde. Toute personne qui ouvre un programme COBOL sait à l'avance où trouver chaque chose.
+| Division | Question à laquelle elle répond | Qui la lit ? |
+| --- | --- | --- |
+| `IDENTIFICATION` | « Comment s'appelle ce programme ? » (PROGRAM-ID = son nom d'appel, utilisé par un `CALL`) | Le compilateur, et tout programme qui l'appelle |
+| `ENVIRONMENT` | « Quels fichiers/machine utilise-t-il ? » | L'exploitation, la reprise après incident |
+| `DATA` | « Quelles données manipule-t-il et sous quel format ? » | Le développeur — c'est là qu'on passe la moitié de son temps |
+| `PROCEDURE` | « Que fait-il, concrètement ? » | Le développeur |
+
+Concrètement, sur un programme batch de 10 000 lignes en banque : grâce à ce découpage, tu trouves en 30 secondes les fichiers qu'il lit, les zones qu'il manipule, et le squelette de traitement — sans lire le code en entier. C'est ça, la vraie valeur.
+Deux précisions bonus :
+Le compilateur exige cet ordre — c'est une règle du langage, pas une convention.
+PROGRAM-ID. HELLO. a un rôle technique : c'est sous ce nom que le programme est compilé et qu'un autre programme pourra l'appeler avec CALL "HELLO" (on le verra en semaine 6).
+Retiens la phrase d'entretien : « Les divisions séparent l'identification, le lien machine, les données et le traitement — c'est ce qui rend un programme COBOL lisible et maintenable par n'importe qui, même 40 ans après. »
+
+-------
+Excellent rapport d'erreur — on vient de tomber sur notre première vraie leçon de diagnostic ! 🔍
+Diagnostic : les deux erreurs ont la même cause
+Regarde bien :
+Ligne 5 : le compilateur bute sur VALUE 100,50.
+Ligne 9 : il bute sur 0,20
+Coupable : la virgule décimale. J'ai écrit les nombres à la française (100,50), mais GnuCOBOL, par défaut, attend un point (100.50) comme séparateur décimal. Pour lui, 100,50 = deux éléments séparés par une virgule → il ne comprend pas, d'où le « unexpected . » et le « unexpected Literal ».
+(Third message est juste une conséquence : la compilation ayant échoué, l'exécutable CALCULE2 n'a jamais été créé — donc PowerShell ne le trouve pas. La cascade classique : corriger la compilation d'abord, toujours.)
+
+Correction — deux options
+Option A (la plus simple) : utiliser le point partout
+
+Option B (la façon mainframe française) : déclarer la virgule comme séparateur
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT IS COMMA.
+       DATA DIVISION.
+       ...
+
+       Avec cette clause, 100,50 et 0,20 deviennent valides. C'est d'ailleurs ainsi que codent beaucoup d'applications COBOL françaises sur z/OS — tu la rencontreras en lisant du code de banques françaises.
+À retenir de cet incident
+Un échec de compilation → pas d'exécutable : toujours lire la première erreur, la corriger, recompiler. Les erreurs suivantes sont souvent en cascade.
+Le format des nombres décimaux dépend du compilateur/contexte : point par défaut, virgule si DECIMAL-POINT IS COMMA est déclaré. Réflexe de mission : quand tu ouvres un programme existant, regarde d'abord s'il y a un SPECIAL-NAMES dans la CONFIGURATION SECTION — ça t'évite de mal lire tous ses littéraux.
+Recompile avec une des deux corrections 
+-----
+Lecture du résultat (Ex. 2.1 validé)
+text
+Copier
+
+PRIX   : 0100.50
+TVA    : 020.10
+TOTAL  : 0120.60
 
 
+Ce que tu observes : les zéros non significatifs s'affichent. Pourquoi ?
+Une zone PIC 9(4)V99 réserve exactement 6 chiffres en mémoire, ni plus ni moins. Quand COBOL l'affiche, il sort les 6 positions telles quelles : 0100.50. La zone est une longueur fixe rembourrée de zéros — il n'y a aucune notion de « joli affichage » par défaut.
+À l'inverse, PIC X(10) remplit à droite avec des espaces. C'est toute la philosophie COBOL : les données ont une taille fixe définie une fois pour toutes, ce qui rend leur manipulation en batch parfaitement prévisible (et c'est pour ça que les fichiers mainframe ont un LRECL fixe, comme tu le verras en JCL).
+La solution d'affichage élégant (aperçu de la semaine 3) : les zones d'édition. Une variable PIC ZZ,ZZ9.99 contient des symboles d'édition qui suppriment les zéros superflus à l'affichage :
 
+       01 WS-PRIX-EDIT    PIC ZZ,ZZ9.99.
+       ...
+           MOVE WS-PRIX TO WS-PRIX-EDIT
+           DISPLAY "PRIX : " WS-PRIX-EDIT
+
+→ affiche   100.50. Tu maîtriseras ça bientôt, c'est un classique d'entretien.
+
+Option B validée aussi — et c'est encore mieux : tu as maintenant vu les deux facettes !
+Ce que tu viens de constater
+
+PRIX  : 0100,50
+
+
+La clause DECIMAL-POINT IS COMMA fait plus que simplement accepter 100,50 dans le source : elle agit aussi sur l'édition des données à l'exécution. Le PIC 9(4)V99 s'affiche désormais avec une virgule — et une PIC ZZ,ZZ9.99 afficherait 1.234,56 au lieu de 1,234.56. Le point décimal est un paramètre global du programme, pas juste une convention d'écriture.
+
+Pourquoi c'est important pour ta future mission
+En France, la majorité des applications COBOL bancaires historiques contiennent cette clause. Concrètement, en mission :
+Tu ouvres un programme existant → réflexe : chercher DECIMAL-POINT IS COMMA dans SPECIAL-NAMES avant de lire tout le reste. Sinon tu interprètes mal tous les littéraux et toutes les PICTURE du programme.
+Si tu développes un nouveau module dans une application qui l'a, il faut la mettre aussi — sinon ton 0.20 sera lu différemment par le compilateur selon le contexte.
+Tu as donc en main une connaissance que beaucoup de débutants découvrent en production (avec un incident en prime
+
+------
+
+JE suis coincé avec le code :        IDENTIFICATION DIVISION.
+       PROGRAM-ID. CALCULE3.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-PRIX          PIC 9(4)V99 VALUE 100.50.
+       01 WS-TVA           PIC 9(3)V99 VALUE WS-PRIX * 0.20.
+       01 WS-TOTAL         PIC 9(4)V99 VALUE WS-PRIX + WS-TVA.
+       PROCEDURE DIVISION.
+           MOVE 250 TO WS-PRIX.
+           ADD 10 TO WS-PRIX.
+           SUBTRACT 5 FROM WS-PRIX GIVING WS-TOTAL.
+           DISPLAY "PRIX  : " WS-PRIX
+           DISPLAY "TVA   : " WS-TVA
+           DISPLAY "TOTAL : " WS-TOTAL.
+       STOP RUN.
+
+Bien vu que le problème venait de la déclaration — je t'explique pourquoi tu es coincé, c'est une règle fondamentale.
+
+### La clause `VALUE` n'accepte pas d'expressions
+
+```cobol
+       01 WS-TVA  PIC 9(3)V99 VALUE WS-PRIX * 0.20.   *> ❌ interdit
+```
+
+La clause `VALUE` ne peut contenir qu'une **littéral fixe** (un nombre ou une chaîne écrit en dur) ou certaines clauses figuratives (`ZERO`, `SPACE`, `HIGH-VALUE`…). Elle est évaluée **une seule fois, au chargement du programme** — or à ce moment-là, `WS-PRIX` est juste en train d'être initialisé : le compilateur ne peut pas exécuter un calcul à cet endroit. C'est le compilateur qui pose la valeur, pas le programme qui la calcule.
+
+Autrement dit :
+- **DATA DIVISION** = je *décris* des zones et je peux les pré-remplir avec des constantes.
+- **PROCEDURE DIVISION** = je *calcule* — tout calcul, aussi trivial soit-il, vit ici.
+
+Donc ta TVA doit être calculée en `PROCEDURE DIVISION`, après les opérations qui fixent le prix :
+
+```cobol
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CALCULE3.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-PRIX          PIC 9(4)V99 VALUE 100.50.
+       01 WS-TVA           PIC 9(3)V99.
+       01 WS-TOTAL         PIC 9(4)V99.
+       PROCEDURE DIVISION.
+           MOVE 250 TO WS-PRIX
+           ADD 10 TO WS-PRIX
+           COMPUTE WS-TVA = WS-PRIX * 0.20
+           SUBTRACT 5 FROM WS-PRIX GIVING WS-TOTAL
+           DISPLAY "PRIX  : " WS-PRIX
+           DISPLAY "TVA   : " WS-TVA
+           DISPLAY "TOTAL : " WS-TOTAL
+           STOP RUN.
+```
+
+Note deux choses dans ma version :
+1. Le `COMPUTE` est placé **après** `ADD 10 TO WS-PRIX` — l'ordre des instructions compte, la TVA se calcule sur le prix du moment.
+2. J'ai enlevé les points intermédiaires et gardé **un seul point par phrase logique** : `MOVE ... ADD ... COMPUTE ...` forment une phrase jusqu'au point après `WS-TOTAL`. C'est le style classique COBOL. Ton point après chaque ligne marchait aussi (ce sont alors des phrases d'une instruction), mais autant prendre le style que tu verras en entreprise.
+
+⚠️ Détail de logique dans ton énoncé d'origine : tu voulais `TOTAL = PRIX + TVA`, mais ton `SUBTRACT 5 FROM WS-PRIX GIVING WS-TOTAL` met `TOTAL = PRIX - 5`. Deux calculs différents — à toi de choisir ce que le programme doit faire et de l'écrire explicitement. En mission, ce genre d'ambiguïté entre l'intention et le code est exactement ce qu'on attend que tu détectes.
+
+Exécute, vérifie le résultat (à la main : 250 + 10 = 260 → TVA 52 → puis ton choix pour TOTAL), et enchaîne sur **FACTURE (Ex. 2.2)**. 👇

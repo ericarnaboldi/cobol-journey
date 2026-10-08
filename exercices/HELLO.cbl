@@ -1,8 +1,0 @@
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. HELLO.
-       PROCEDURE DIVISION.
-           DISPLAY "BONJOUR PREMIER PROGRAMME COBOL".
-           DISPLAY "COMENT CA VA ?".
-           DISPLAY "AU REVOIR".
-           STOP RUN.
-           

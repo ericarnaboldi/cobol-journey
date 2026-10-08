@@ -1,0 +1,33 @@
+KIT DE DEMARRAGE - COBOL, DE ZERO A LA PREMIERE MISSION
+=======================================================
+
+Versions testees des programmes du cours (GnuCOBOL 3.1, verifiees
+aussi en dialecte IBM strict). Tape d'abord ta propre version,
+puis compare avec celle-ci.
+
+Contenu
+-------
+HELLO.cbl        Semaine 0  Premier programme, les quatre divisions
+INTERETS.cbl     Semaine 2  Livret d'epargne : COMP-3, PERFORM VARYING
+FILIALI.cbl      Semaine 3  Tableau en memoire, SEARCH ALL
+RELEVE.cbl       Semaine 4  Releve par compte : fichier, rupture
+copybooks/       Semaine 4  MVTREC.cpy, l'enregistrement mouvement
+MOUVTS           Semaine 4  Fichier de mouvements (donnees de test)
+S0C7.cbl         Semaine 4  Erreur de donnees provoquee volontairement
+GESTCLI.cbl      Semaine 7  Fichier indexe (equivalent local de VSAM)
+CONVDATE.cbl     Semaine 7  Sous-programme de conversion de date
+APPELANT.cbl     Semaine 7  Programme qui appelle CONVDATE
+
+Compiler et lancer
+------------------
+  cobc -x -debug HELLO.cbl                 puis  ./HELLO
+  cobc -x -debug INTERETS.cbl              puis  ./INTERETS
+  cobc -x -debug FILIALI.cbl               puis  ./FILIALI
+  cobc -x -debug -I copybooks RELEVE.cbl   puis  ./RELEVE  et  cat RAPPORT
+  cobc -x S0C7.cbl                         puis  ./S0C7   (total faux)
+  cobc -x -debug S0C7.cbl                  puis  ./S0C7   (erreur detectee)
+  cobc -x -debug GESTCLI.cbl               puis  ./GESTCLI
+  cobc -x APPELANT.cbl CONVDATE.cbl        puis  ./APPELANT
+
+Sur z/OS : retirer les lignes "ORGANIZATION IS LINE SEQUENTIAL"
+de RELEVE.cbl (propres a GnuCOBOL).

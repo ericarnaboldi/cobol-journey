@@ -125,3 +125,104 @@ For example, calculating interest as capital multiplied by rate does not, by its
 
 ### Daily assessment
 The main challenge was interpreting business meaning from the code. Further practice is needed to connect technical operations with business requirements and to identify what cannot be concluded from a code excerpt alone.
+
+## 2026-10-12 — Day 3: Conditional logic and business rules
+
+### Objectives
+- Understand and use `IF`, `ELSE` and `END-IF`.
+- Combine conditions using `AND` and `OR`.
+- Use parentheses to make complex conditions explicit.
+- Test whether program behaviour matches an expected business rule.
+
+### Work completed
+
+**1. Basic conditional logic — `DAY03-01.cbl`**
+
+Implemented a classification rule based on capital:
+
+- If capital is greater than or equal to `10000`, display `CATEGORIE PREMIUM`.
+- Otherwise, display `CATEGORIE STANDARD`.
+
+Executed three test cases:
+
+| Capital | Expected result | Actual result |
+|---:|---|---|
+| 12000 | CATEGORIE PREMIUM | CATEGORIE PREMIUM |
+| 10000 | CATEGORIE PREMIUM | CATEGORIE PREMIUM |
+| 9999.99 | CATEGORIE STANDARD | CATEGORIE STANDARD |
+
+All three tests passed. The boundary test confirmed that `>=` includes equality.
+
+**2. Combining conditions with `AND`**
+
+Studied a rule requiring both conditions to be true:
+
+- Capital greater than or equal to `10000`.
+- Savings-account type equal to `P`.
+
+Confirmed that `AND` requires every condition in the expression to be true.
+
+**3. Combining conditions with `OR`**
+
+Studied a priority rule where either of the following is sufficient:
+
+- Capital greater than or equal to `10000`.
+- Savings-account type equal to `P`.
+
+Confirmed that `OR` allows the condition to be satisfied when at least one of the alternatives is true.
+
+**4. Mixed conditions and parentheses — `DAY03-02A.cbl` to `DAY03-02D.cbl`**
+
+Implemented and tested the following rule:
+
+`(capital >= 10000 AND account type = "P") OR exception = "O"`
+
+The program displays `TRAITEMENT PRIORITAIRE` when the first grouped condition is satisfied or an exception is granted. Otherwise, it displays `TRAITEMENT STANDARD`.
+
+Compiled and executed four program versions:
+
+| Test | Capital | Account type | Exception | Expected result | Actual result |
+|---|---:|---|---|---|---|
+| A | 12000 | P | N | Priority | Priority |
+| B | 12000 | S | N | Standard | Standard |
+| C | 8000 | S | O | Priority | Priority |
+| D | 8000 | P | N | Standard | Standard |
+
+All four tests passed.
+
+### Lessons learned
+
+- `AND` requires all combined conditions to be true; `OR` requires at least one.
+- Parentheses make the intended grouping of mixed conditions explicit.
+- Boundary cases help verify the exact meaning of comparison operators.
+- A test must compare actual output against an expected result, not merely confirm that the program runs.
+- Correct implementation of a rule does not prove that the rule itself is correct from a business perspective.
+
+### Application-analysis reflexes
+
+When a classification appears incorrect:
+
+1. Verify that the expected business rule is correctly understood and documented.
+2. If the rule is confirmed, trace the relevant variable values through the instructions.
+3. Identify where the observed execution diverges from the expected behaviour.
+4. Reproduce the issue with a specific test case and verify the correction.
+
+### Points to reinforce
+
+- Continue practising mixed conditions and boundary cases.
+- Pay particular attention to the grouping of `AND` and `OR` expressions.
+- Make complex business rules readable and test each logical path.
+- Distinguish the correctness of the code from the correctness of the business requirement.
+
+### Deliverables
+
+- `01-cobol/exercices/DAY03-01.cbl` — basic conditional classification.
+- `01-cobol/exercices/DAY03-02A.cbl` to `DAY03-02D.cbl` — mixed-condition test scenarios.
+
+### Daily assessment
+
+Basic conditional logic and the distinction between `AND` and `OR` are understood. All seven reported test cases passed.
+
+The main point of vigilance identified is the risk of misreading or incorrectly grouping mixed conditions, particularly when parentheses are omitted or overlooked.
+
+A useful diagnostic approach is emerging: confirm the business rule first, then trace the values used by the program to determine where its behaviour diverges from expectations.

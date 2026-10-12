@@ -1,0 +1,20 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DAY03-02B.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  WS-CAPITAL PIC 9(5)V99 VALUE 0.
+       01  WS-TYPE-LIVRET PIC X VALUE "S".
+       01  WS-DEROGATION PIC X VALUE "N".
+       PROCEDURE DIVISION.
+           MOVE 12000.00 TO WS-CAPITAL
+           MOVE "S" TO WS-TYPE-LIVRET
+           MOVE "N" TO WS-DEROGATION
+           IF (WS-CAPITAL >= 10000
+               AND WS-TYPE-LIVRET = "P")
+               OR WS-DEROGATION = "O"
+               DISPLAY "TRAITEMENT PRIORITAIRE"
+           ELSE
+               DISPLAY "TRAITEMENT STANDARD"
+           END-IF
+           STOP RUN.
+             

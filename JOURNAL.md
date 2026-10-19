@@ -20,11 +20,13 @@ ls = list directory contents mkdir = make directory rm = remove file or director
 ## Semaine 1 — 8 octobre 2026
 
 ### Day 1 — Positioning, COBOL fundamentals & application analysis
+
 **8 October 2026**
 
 First day of the professional retraining path toward Mainframe application development and analysis.
 
 **Work completed**
+
 - Wrote and refined a first COBOL program using `ACCEPT`, `COMPUTE` and `DISPLAY`.
 - Analysed an existing COBOL application (`INTERETS.cbl`) rather than only writing new code.
 - Identified program inputs, outputs, business data and technical data.
@@ -42,6 +44,7 @@ COBOL development is not limited to writing COBOL statements. It requires unders
 A key professional skill being developed is the ability to act as a bridge between business requirements and application behaviour: understanding business needs, identifying how they are implemented in code, and explaining the resulting behaviour clearly.
 
 **Skills strengthened**
+
 - COBOL fundamentals
 - Existing-code analysis
 - Business-rule identification
@@ -57,6 +60,7 @@ Continue developing the discipline of explicitly distinguishing **facts, hypothe
 ## 2026-10-12 — Day 2: Data flow and program analysis
 
 ### Objectives
+
 - Understand how COBOL instructions modify variable values.
 - Trace data through a program instruction by instruction.
 - Distinguish program execution from business correctness.
@@ -66,12 +70,14 @@ Continue developing the discipline of explicitly distinguishing **facts, hypothe
 **1. Data-flow exercise — `DAY02-01.cbl`**
 
 Created and executed a COBOL program using:
+
 - `MOVE` to assign values;
 - `COMPUTE` to calculate interest and totals;
 - `ADD` to update an existing value;
 - `DISPLAY` to inspect program output.
 
 Initial test:
+
 - Capital: `12000.00`
 - Rate: `0.05`
 - Interest: `00600.00`
@@ -82,6 +88,7 @@ Initial test:
 Analysed how successive instructions affect `WS-TOTAL`.
 
 Key observations:
+
 - `MOVE` replaces the destination variable's current value.
 - `ADD` adds a quantity to the destination's current value.
 - `COMPUTE` evaluates an expression and assigns the result to the destination variable.
@@ -98,6 +105,7 @@ Corrected the data flow by assigning `12000.00` to `WS-CAPITAL` and calculating 
 `COMPUTE WS-TOTAL = WS-CAPITAL + WS-INTERET`
 
 Recompiled and executed the corrected program. The output matched the expected values:
+
 - Capital: `12000.00`
 - Interest: `00600.00`
 - Total: `12600.00`
@@ -109,6 +117,7 @@ Discussed the distinction between a mathematically correct calculation and a bus
 For example, calculating interest as capital multiplied by rate does not, by itself, establish whether the amount is gross or net, whether the rate is appropriate, or whether the calculation complies with the applicable business rules.
 
 ### Lessons learned
+
 - Trace variable values rather than relying on an initial reading of the code.
 - Identify assignments that overwrite previous values.
 - Compare actual output with an explicitly defined expected result.
@@ -116,19 +125,23 @@ For example, calculating interest as capital multiplied by rate does not, by its
 - A program can compile and execute successfully without necessarily meeting the business requirement.
 
 ### Points to reinforce
+
 - Interpret COBOL calculations in their business context.
 - Verify business assumptions against reliable specifications or expected test cases.
 - Continue practising structured diagnosis on programs with more variables and conditional logic.
 
 ### Deliverables
+
 - `01-cobol/exercices/DAY02-01.cbl` — corrected and tested exercise.
 
 ### Daily assessment
+
 The main challenge was interpreting business meaning from the code. Further practice is needed to connect technical operations with business requirements and to identify what cannot be concluded from a code excerpt alone.
 
 ## 2026-10-12 — Day 3: Conditional logic and business rules
 
 ### Objectives
+
 - Understand and use `IF`, `ELSE` and `END-IF`.
 - Combine conditions using `AND` and `OR`.
 - Use parentheses to make complex conditions explicit.
@@ -145,10 +158,10 @@ Implemented a classification rule based on capital:
 
 Executed three test cases:
 
-| Capital | Expected result | Actual result |
-|---:|---|---|
-| 12000 | CATEGORIE PREMIUM | CATEGORIE PREMIUM |
-| 10000 | CATEGORIE PREMIUM | CATEGORIE PREMIUM |
+| Capital | Expected result    | Actual result      |
+| -------:| ------------------ | ------------------ |
+| 12000   | CATEGORIE PREMIUM  | CATEGORIE PREMIUM  |
+| 10000   | CATEGORIE PREMIUM  | CATEGORIE PREMIUM  |
 | 9999.99 | CATEGORIE STANDARD | CATEGORIE STANDARD |
 
 All three tests passed. The boundary test confirmed that `>=` includes equality.
@@ -182,11 +195,11 @@ The program displays `TRAITEMENT PRIORITAIRE` when the first grouped condition i
 Compiled and executed four program versions:
 
 | Test | Capital | Account type | Exception | Expected result | Actual result |
-|---|---:|---|---|---|---|
-| A | 12000 | P | N | Priority | Priority |
-| B | 12000 | S | N | Standard | Standard |
-| C | 8000 | S | O | Priority | Priority |
-| D | 8000 | P | N | Standard | Standard |
+| ---- | -------:| ------------ | --------- | --------------- | ------------- |
+| A    | 12000   | P            | N         | Priority        | Priority      |
+| B    | 12000   | S            | N         | Standard        | Standard      |
+| C    | 8000    | S            | O         | Priority        | Priority      |
+| D    | 8000    | P            | N         | Standard        | Standard      |
 
 All four tests passed.
 
@@ -226,3 +239,26 @@ Basic conditional logic and the distinction between `AND` and `OR` are understoo
 The main point of vigilance identified is the risk of misreading or incorrectly grouping mixed conditions, particularly when parentheses are omitted or overlooked.
 
 A useful diagnostic approach is emerging: confirm the business rule first, then trace the values used by the program to determine where its behaviour diverges from expectations.
+
+-----
+
+## 2026-10-19 — DAY04 — Conditions et validation des données
+
+### Exercices réalisés
+- DAY04-01 à DAY04-06 : tous les tests prévus sont réussis.
+- Utilisation de EVALUATE TRUE, WHEN et WHEN OTHER.
+- Gestion des conditions composées avec AND.
+- Tests de seuil : 9 999,99 / 10 000,00 / 10 000,01.
+- Saisie interactive avec ACCEPT.
+- Contrôle numérique avec FUNCTION TEST-NUMVAL.
+- Conversion avec FUNCTION NUMVAL.
+- Validation métier du capital et du type de livret.
+- Utilisation de IF imbriqués pour contrôler l'ordre des opérations.
+
+### Point essentiel retenu
+Une donnée représentable techniquement n'est pas nécessairement valide du point de vue métier.
+
+### À consolider
+- Ordre de priorité des conditions.
+- Différence entre validation technique et validation métier.
+- Gestion des erreurs de saisie.

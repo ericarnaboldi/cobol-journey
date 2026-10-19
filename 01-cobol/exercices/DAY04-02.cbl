@@ -1,0 +1,21 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DAY04-02A.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  WS-CAPITAL PIC 9(5) VALUE 12000.
+       01  WS-TYPE-LIVRET PIC X VALUE "P".
+       01  WS-DEROGATION PIC X VALUE "N".
+
+       PROCEDURE DIVISION.
+           EVALUATE TRUE 
+               WHEN WS-CAPITAL >= 10000
+                    AND WS-TYPE-LIVRET = "P"
+                    DISPLAY "LIVRET PRIORITAIRE"
+               WHEN WS-DEROGATION = "O"
+                    DISPLAY "TRAITEMENT PAR DEROGATION"
+               WHEN OTHER
+                    DISPLAY "TRAITEMENT STANDARD"
+               END-EVALUATE
+
+           STOP RUN.

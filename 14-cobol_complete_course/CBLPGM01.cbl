@@ -1,0 +1,156 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CBLPGM01.
+       AUTHOR. ERIC ARNABOLDI.
+       DATE-WRITTEN. 2026-10-19.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT CC-OUTFILE1    ASSIGN TO CC-OUTFILE1
+           ORGANISATION IS SEQUENTIAL
+           ACCESS MODE IS SEQUENTIAL 
+           FILE STATUS IS WS-OUT-STATUS.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD CC-OUTFILE1
+           LABEL RECORD ARE STANDARD.
+       01  CC-OUTPUT-LAYOUT.
+           03 CARD-NUMBER         PIC X(5).
+           03 CUST-NAME           PIC X(10).
+           03 CARD-LIMIT          PIC S9(5)V99.
+           03 PREVIOUS-DUE        PIC S9(5)V99.
+           03 PREVIOUS-DUE-PAID   PIC S9(5)V99.
+           03 CARD-TYPE           PIC X(1).
+              88 GOLD-CARD        VALUE '1'.
+              88 SILVER-CARD      VALUE '2'.
+              88 PLATINUM-CARD    VALUE '3'.
+           03 REWARD-POINT-CODE   PIC X(1).
+              88 REWARD-100-1     VALUE 'A'.
+              88 REWARD-100-2     VALUE 'B'. 
+              88 REWARD-100-3     VALUE 'C'.
+           03 CARD-EXPIRE-DATE    PIC X(8).
+           03 CUST-ACTIVE-IND     PIC X(1).
+              88 ACTIVE-CUST      VALUE 'A'.
+              88 INACTIVE-CUST    VALUE 'I'.
+           03 LAST-BILL-DATE      PIC X(8).
+
+       WORKING-STORAGE SECTION.
+       01  CC-INPUT-LAYOUT.
+           03 CARD-NUMBER         PIC X(5).
+           03 CUST-NAME           PIC X(10).
+           03 CARD-LIMIT          PIC S9(5)V99.
+           03 PREVIOUS-DUE        PIC S9(5)V99.
+           03 PREVIOUS-DUE-PAID   PIC S9(5)V99.
+           03 CARD-TYPE           PIC X(1).
+              88 GOLD-CARD        VALUE '1'.
+              88 SILVER-CARD      VALUE '2'.
+              88 PLATINUM-CARD    VALUE '3'.
+           03 REWARD-POINT-CODE   PIC X(1).
+              88 REWARD-100-1     VALUE 'A'.
+              88 REWARD-100-2     VALUE 'B'. 
+              88 REWARD-100-3     VALUE 'C'.
+           03 CARD-EXPIRE-DATE    PIC X(8).
+           03 CUST-ACTIVE-IND     PIC X(1).
+              88 ACTIVE-CUST      VALUE 'A'.
+              88 INACTIVE-CUST    VALUE 'I'.
+           03 LAST-BILL-DATE      PIC X(8).
+           
+      *DEVELOPER VARIABLE
+       01  WS-OUT-STATUS          PIC X(2) VALUE SPACE.
+       01  WS-IN-REC-COUNT        PIC 9(2) VALUE ZERO.
+       01  WS-OUT-REC-COUNT       PIC 9(2) VALUE ZERO.
+
+       01  WS-ANY-MORE-INPUT      PIC X(1) VALUE SPACE.
+       01  WS-ABENDPGM            PIC X(8) VALUE 'ABENDPGM'.
+
+       PROCEDURE DIVISION.
+       000-MAIN-PARA.
+           DISPLAY 'CBLPGM01 STARTED'
+
+           PERFORM 100-INITIAL-PARA THRU 100-EXIT.
+           PERFORM 200-GET-INPUT-PARA THRU 200-EXIT.
+           PERFORM 300-PROCESS-PARA THRU 300-EXIT
+                   UNTIL WS-ANY-MORE-INPUT = 'N'.
+           
+           CLOSE CC-OUTFILE1.
+           DISPLAY 'TOTAL INPUT REC COUNT' WS-IN-REC-COUNT.
+           DISPLAY 'TOTAL OUTPUT REC COUNT' WS-OUT-REC-COUNT.
+           STOP RUN.
+
+       100-INITIAL-PARA.
+           MOVE 'Y' TO WS-ANY-MORE-INPUT.
+           MOVE ZERO TO WS-IN-REC-COUNT WS-OUT-REC-COUNT
+
+           OPEN OUTPUT CC-OUTFILE1.
+           IF WS-OUT-STATUS = '00'
+               CONTINUE
+           ELSE
+               DISPLAY 'ERROR IN 100-INITIAL-PARA'
+               DISPLAY 'OPEN ERROR STATUS IS' WS-OUT-STATUS
+               CALL WS-ABENDPGM
+           END-IF.
+           INITIALIZE CC-INPUT-LAYOUT CC-OUTPUT-LAYOUT.
+           
+       100-EXIT. EXIT.
+
+       200-GET-INPUT-PARA.
+           ACCEPT  CARD-NUMBER         OF CC-INPUT-LAYOUT.
+           ACCEPT  CUST-NAME           OF CC-INPUT-LAYOUT.
+           ACCEPT  CARD-LIMIT          OF CC-INPUT-LAYOUT.
+           ACCEPT  PREVIOUS-DUE        OF CC-INPUT-LAYOUT.
+           ACCEPT  PREVIOUS-DUE-PAID   OF CC-INPUT-LAYOUT.
+           ACCEPT  CARD-TYPE           OF CC-INPUT-LAYOUT.
+           ACCEPT  REWARD-POINT-CODE   OF CC-INPUT-LAYOUT.
+           ACCEPT  CARD-EXPIRE-DATE    OF CC-INPUT-LAYOUT.
+           ACCEPT  CUST-ACTIVE-IND     OF CC-INPUT-LAYOUT.
+           ACCEPT  LAST-BILL-DATE      OF CC-INPUT-LAYOUT.
+           ADD +1 TO WS-IN-REC-COUNT.
+
+       200-EXIT. EXIT.
+
+       300-PROCESS-PARA.
+           PERFORM 350-MOVE-WRITE-PARA THRU 350-EXIT.
+
+           ACCEPT WS-ANY-MORE-INPUT.
+           IF  WS-ANY-MORE-INPUT = 'Y'
+               PERFORM 200-GET-INPUT-PARA THRU 200-EXIT
+           END-IF.
+
+       300-EXIT. EXIT.
+
+       350-MOVE-WRITE-PARA.
+           MOVE CARD-NUMBER OF CC-INPUT-LAYOUT TO 
+                  CARD-NUMBER OF CC-OUTPUT-LAYOUT.
+           MOVE CUST-NAME OF CC-INPUT-LAYOUT TO 
+                  CUST-NAME OF CC-OUTPUT-LAYOUT.
+           MOVE CARD-LIMIT OF CC-INPUT-LAYOUT TO 
+                  CARD-LIMIT OF CC-OUTPUT-LAYOUT.
+           MOVE PREVIOUS-DUE OF CC-INPUT-LAYOUT TO 
+                  PREVIOUS-DUE OF CC-OUTPUT-LAYOUT.
+           MOVE PREVIOUS-DUE-PAID OF CC-INPUT-LAYOUT TO 
+                  PREVIOUS-DUE-PAID OF CC-OUTPUT-LAYOUT.
+           MOVE CARD-TYPE OF CC-INPUT-LAYOUT TO 
+                  CARD-TYPE OF CC-OUTPUT-LAYOUT.
+           MOVE REWARD-POINT-CODE OF CC-INPUT-LAYOUT TO 
+                  REWARD-POINT-CODE OF CC-OUTPUT-LAYOUT.
+           MOVE CARD-EXPIRE-DATE OF CC-INPUT-LAYOUT TO 
+                  CARD-EXPIRE-DATE OF CC-OUTPUT-LAYOUT.
+           MOVE CUST-ACTIVE-IND OF CC-INPUT-LAYOUT TO 
+                  CUST-ACTIVE-IND OF CC-OUTPUT-LAYOUT.
+           MOVE LAST-BILL-DATE OF CC-INPUT-LAYOUT TO 
+                  LAST-BILL-DATE OF CC-OUTPUT-LAYOUT.
+           WRITE CC-OUTPUT-LAYOUT.
+           IF WS-OUT-STATUS = '00'
+              ADD +1 TO WS-OUT-REC-COUNT 
+           ELSE
+              DISPLAY '350-MOVE-WRITE-PARA'
+              DISPLAY 'WRITE ERROR STATUS IS' WS-OUT-STATUS
+              DISPLAY 'RECORD IS ' CARD-NUMBER OF CC-INPUT-LAYOUT
+              CALL WS-ABENDPGM
+           END-IF.
+      
+       350-EXIT. EXIT.
+
+       STOP RUN.
+       

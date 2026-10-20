@@ -242,23 +242,111 @@ A useful diagnostic approach is emerging: confirm the business rule first, then 
 
 -----
 
-## 2026-10-19 — DAY04 — Conditions et validation des données
+## 2026-10-19 — Day 4: Multiple-choice logic and rule precedence
 
-### Exercices réalisés
-- DAY04-01 à DAY04-06 : tous les tests prévus sont réussis.
-- Utilisation de EVALUATE TRUE, WHEN et WHEN OTHER.
-- Gestion des conditions composées avec AND.
-- Tests de seuil : 9 999,99 / 10 000,00 / 10 000,01.
-- Saisie interactive avec ACCEPT.
-- Contrôle numérique avec FUNCTION TEST-NUMVAL.
-- Conversion avec FUNCTION NUMVAL.
-- Validation métier du capital et du type de livret.
-- Utilisation de IF imbriqués pour contrôler l'ordre des opérations.
+### Objectives
 
-### Point essentiel retenu
-Une donnée représentable techniquement n'est pas nécessairement valide du point de vue métier.
+- Understand and use `EVALUATE` as an alternative to chains of `IF / ELSE`.
+- Understand `EVALUATE TRUE` for expressing complex business rules.
+- Understand the priority order of `WHEN` branches (first match wins).
+- Test every logical path, including values that match no explicit case.
+  
+  ### Work completed
+  
+  **1. Simple EVALUATE — `DAY04-01.cbl`**
+  Implemented a three-way classification based on savings-account type:
+- `P` → `LIVRET PREMIUM`
+- `S` → `LIVRET STANDARD`
+- any other value → `TYPE DE LIVRET INCONNU`
+  Compiled and executed the program with three successive initial values for `WS-TYPE-LIVRET`:
+  
+  | WS-TYPE-LIVRET                                                                                | Expected result        | Actual result          |
+  | --------------------------------------------------------------------------------------------- | ---------------------- | ---------------------- |
+  | P                                                                                             | LIVRET PREMIUM         | LIVRET PREMIUM         |
+  | S                                                                                             | LIVRET STANDARD        | LIVRET STANDARD        |
+  | X                                                                                             | TYPE DE LIVRET INCONNU | TYPE DE LIVRET INCONNU |
+  | All three branches passed. The `WHEN OTHER` branch correctly caught the unexpected value `X`. |                        |                        |
+  | **2. EVALUATE TRUE with complex conditions — `DAY04-02A.cbl` to `DAY04-02D.cbl`**             |                        |                        |
+  | Implemented a priority rule combining capital, account type and exception status:             |                        |                        |
+1. If capital ≥ 10000 **AND** type = `P` → `LIVRET PRIORITAIRE`
+2. Otherwise, if exception = `O` → `TRAITEMENT PAR DEROGATION`
+3. Otherwise → `TRAITEMENT STANDARD`
+   Implemented as `EVALUATE TRUE` with three `WHEN` branches. Compiled and executed four variants, each with its own initial values:
+   
+   | Test                                                                                                                                                                                                                                                                                                        | Capital | Type | Exception | Expected result           | Actual result             |
+   | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------:| ---- | --------- | ------------------------- | ------------------------- |
+   | A                                                                                                                                                                                                                                                                                                           | 12000   | P    | N         | LIVRET PRIORITAIRE        | LIVRET PRIORITAIRE        |
+   | B                                                                                                                                                                                                                                                                                                           | 12000   | S    | N         | TRAITEMENT STANDARD       | TRAITEMENT STANDARD       |
+   | C                                                                                                                                                                                                                                                                                                           | 8000    | S    | O         | TRAITEMENT PAR DEROGATION | TRAITEMENT PAR DEROGATION |
+   | D                                                                                                                                                                                                                                                                                                           | 12000   | P    | O         | LIVRET PRIORITAIRE        | LIVRET PRIORITAIRE        |
+   | All four tests passed. Case D confirmed that `EVALUATE TRUE` executes the **first** matching `WHEN` branch and ignores the rest: although the exception condition (`WS-DEROGATION = "O"`) is also true, the first condition (capital ≥ 10000 AND type = `P`) wins and the second branch is never evaluated. |         |      |           |                           |                           |
+   
+   ### Lessons learned
+- `EVALUATE` expresses a multi-way choice more readably than a chain of `IF / ELSE IF`, especially when the branches are mutually exclusive.
+- `EVALUATE TRUE` evaluates each `WHEN` condition in order and stops at the first true one. The order of the branches is therefore significant.
+- The order of `WHEN` branches is a **business decision**, not a technical detail. It determines which rule takes precedence when several rules apply simultaneously.
+- `WHEN OTHER` acts as a default case. It is essential to catch values that match no explicit branch and to prevent them from being silently ignored.
+- A rule can be technically correctly implemented and still be wrong from a business perspective. Testing proves that the code matches the programmer's understanding of the rule, not that the rule itself is correct.
+  
+  ### Application-analysis reflexes
+  
+  When a decision looks incorrect:
+1. Verify the expected priority order of the business rules (which rule should win when several apply?).
+2. Trace the value of the fields examined by the `EVALUATE`.
+3. Check whether an earlier `WHEN` branch matches the case and masks the branch that should have applied.
+4. Reproduce the case with a specific test and compare with the expected rule.
+   
+   ### Points to reinforce
+- Explicitly document the priority order of business rules before coding them.
+- Systematically test overlapping cases, where several conditions are true at once (such as case D).
+- Remember that `EVALUATE TRUE` short-circuits on the first match: the result depends on the order of the branches.
+  
+  ### Deliverables
+- `01-cobol/exercices/DAY04-01.cbl` — three-way classification with `WHEN OTHER`.
+- `01-cobol/exercices/DAY04-02A.cbl` to `DAY04-02D.cbl` — priority rule test scenarios.
+  
+  ### Daily assessment
+  
+  `EVALUATE` and `EVALUATE TRUE` are understood. All seven reported test cases (three for `DAY04-01`, four for `DAY04-02`) passed.
+  The main insight of the day concerns the **priority order** of conditions. In a multi-rule business process, several conditions may be true simultaneously, and the program's behaviour is determined by the order of the `WHEN` branches. This order must be treated as a business requirement: documented, justified, and tested explicitly, especially for overlapping cases such as case D.
+  The main risk to watch is therefore not technical but analytical: reading a rule correctly, but failing to ask **which rule should take precedence** when several apply. This reflex will be essential for analysing existing systems, where rule precedence is often implicit in the code and must be reconstructed and verified.
 
-### À consolider
-- Ordre de priorité des conditions.
-- Différence entre validation technique et validation métier.
-- Gestion des erreurs de saisie.
+## DAY05 — Tables, mouvements et contrôle des données
+
+**Date : 20 octobre 2026**
+
+### Travail réalisé
+
+- Utilisation d'une table COBOL déclarée avec `OCCURS 3 TIMES`.
+- Initialisation de trois mouvements dans une procédure dédiée.
+- Parcours de la table à l'aide d'un compteur et de `PERFORM UNTIL`.
+- Traitement des débits et crédits selon le type de mouvement.
+- Affichage du type, du solde après chaque mouvement et du solde final.
+- Ajout d'un contrôle explicite pour les types de mouvements invalides.
+
+### Tests effectués
+
+**Scénario nominal :**
+- Solde initial : 1 000,00.
+- Débit de 150,00 : solde de 850,00.
+- Crédit de 300,00 : solde de 1 150,00.
+- Débit de 75,00 : solde de 1 075,00.
+- Résultat : réussi.
+
+**Scénario invalide :**
+- Débit de 150,00 : solde de 850,00.
+- Mouvement de type `X` : erreur signalée, solde inchangé.
+- Débit de 75,00 : solde de 775,00.
+- Résultat : réussi.
+
+### Enseignements
+
+Un programme doit contrôler les valeurs reçues avant de leur appliquer une opération métier. Une donnée invalide doit être signalée et ne doit pas modifier le solde. Le traitement doit également conserver un comportement cohérent après le rejet de cette donnée.
+
+### Statut
+
+**DAY05 officiellement validé.**
+
+Programme de référence : `DAY05-19-02.cbl`.
+
+

@@ -1,0 +1,18 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DAY05-05.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  COMPTEUR PIC 99 VALUE 1.
+       01  TOTAL    PIC 999 VALUE 0.
+
+       PROCEDURE DIVISION.
+           PERFORM UNTIL COMPTEUR > 20
+                ADD COMPTEUR TO TOTAL
+                ADD 1 TO COMPTEUR
+           END-PERFORM
+
+           DISPLAY 'TOTAL = ' TOTAL
+
+           STOP RUN.

@@ -1,0 +1,26 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DAY05-07.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  SOLDE PIC S9(5)V99 VALUE 1000.
+       01  TYPE-MOVEMENT PIC X VALUE "x".
+       01  MONTANT PIC 9(5)V99 VALUE 200.
+
+       PROCEDURE DIVISION.
+           DISPLAY "SOLDE INITIAL : " SOLDE
+
+           EVALUATE TYPE-MOVEMENT
+               WHEN "D"
+                   SUBTRACT MONTANT FROM SOLDE
+                   DISPLAY "DEBIT TRAITE : " SOLDE
+               WHEN "C"
+                   ADD MONTANT TO SOLDE
+                   DISPLAY "CREDIT TRAITE : " SOLDE
+               WHEN OTHER
+                   DISPLAY "ANOMALIE : TYPE INCONNU"
+           END-EVALUATE
+
+           DISPLAY "SOLDE FINAL : " SOLDE
+
+           STOP RUN.

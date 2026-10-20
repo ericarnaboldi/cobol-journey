@@ -1,0 +1,15 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DAY05-01.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  COMPTEUR PIC 9 VALUE 1.
+
+       PROCEDURE DIVISION.
+           PERFORM 5 TIMES
+                DISPLAY COMPTEUR
+                ADD 1 TO COMPTEUR
+              END-PERFORM
+
+           STOP RUN.
+           
